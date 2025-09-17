@@ -267,11 +267,9 @@ const DiabetesApp = () => {
                 Рост (см)
               </label>
               <input
-                type="number"
-                pattern="[0-9]*"
+                type="text"
                 value={setup.height}
                 onChange={(e) => setSetup({...setup, height: e.target.value})}
-                onInput={(e) => setSetup({...setup, height: e.target.value})}
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 placeholder="170"
                 required
@@ -283,12 +281,9 @@ const DiabetesApp = () => {
                 Текущий вес (кг)
               </label>
               <input
-                type="number"
-                step="0.1"
-                pattern="[0-9]*[.,]?[0-9]*"
+                type="text"
                 value={setup.weight}
                 onChange={(e) => setSetup({...setup, weight: e.target.value})}
-                onInput={(e) => setSetup({...setup, weight: e.target.value})}
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 placeholder="75.5"
                 required
@@ -525,12 +520,9 @@ const DiabetesApp = () => {
                 Значение ({userProfile.glucoseUnit === 'mmol' ? 'ммоль/л' : 'мг/дл'})
               </label>
               <input
-                type="number"
-                step="0.1"
-                pattern="[0-9]*[.,]?[0-9]*"
+                type="text"
                 value={glucoseForm.value}
                 onChange={(e) => setGlucoseForm({...glucoseForm, value: e.target.value})}
-                onInput={(e) => setGlucoseForm({...glucoseForm, value: e.target.value})}
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 placeholder={userProfile.glucoseUnit === 'mmol' ? "5.5" : "100"}
                 required
@@ -685,12 +677,9 @@ const DiabetesApp = () => {
                 Утренний вес (кг)
               </label>
               <input
-                type="number"
-                step="0.1"
-                pattern="[0-9]*[.,]?[0-9]*"
+                type="text"
                 value={weightForm.morning}
                 onChange={(e) => setWeightForm({...weightForm, morning: e.target.value})}
-                onInput={(e) => setWeightForm({...weightForm, morning: e.target.value})}
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 placeholder="75.5"
               />
@@ -701,12 +690,9 @@ const DiabetesApp = () => {
                 Вечерний вес (кг)
               </label>
               <input
-                type="number"
-                step="0.1"
-                pattern="[0-9]*[.,]?[0-9]*"
+                type="text"
                 value={weightForm.evening}
                 onChange={(e) => setWeightForm({...weightForm, evening: e.target.value})}
-                onInput={(e) => setWeightForm({...weightForm, evening: e.target.value})}
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 placeholder="76.0"
               />
@@ -918,11 +904,9 @@ const DiabetesApp = () => {
                 Рост (см)
               </label>
               <input
-                type="number"
-                pattern="[0-9]*"
+                type="text"
                 value={editProfile.height}
                 onChange={(e) => setEditProfile({...editProfile, height: e.target.value})}
-                onInput={(e) => setEditProfile({...editProfile, height: e.target.value})}
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -932,12 +916,9 @@ const DiabetesApp = () => {
                 Текущий вес (кг)
               </label>
               <input
-                type="number"
-                step="0.1"
-                pattern="[0-9]*[.,]?[0-9]*"
+                type="text"
                 value={editProfile.weight}
                 onChange={(e) => setEditProfile({...editProfile, weight: e.target.value})}
-                onInput={(e) => setEditProfile({...editProfile, weight: e.target.value})}
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               />
             </div>
