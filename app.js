@@ -65,6 +65,140 @@ const DiabetesApp = () => {
     return (parseFloat(weight) * 0.04).toFixed(1);
   };
 
+  // Функция печати
+  const printGlucoseTable = () => {
+    const printWindow = window.open('', '_blank');
+    const glucoseData = glucoseRecords.slice(-30).reverse();
+    
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Контроль сахара в крови</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+            th { background-color: #f2f2f2; }
+            h1 { color: #333; }
+            .print-date { color: #666; font-size: 14px; }
+          </style>
+        </head>
+        <body>
+          <h1>Контроль уровня сахара в крови</h1>
+          <p class="print-date">Дата печати: ${new Date().toLocaleDateString('ru-RU')}</p>
+          <table>
+            <thead>
+              <tr>
+                <th>Дата</th>
+                <th>Время</th>
+                <th>Значение</th>
+                <th>Тип измерения</th>
+                <th>Заметки</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${glucoseData.map(record => `
+                <tr>
+                  <td>${record.date}</td>
+                  <td>${record.time}</td>
+                  <td>${record.value} ${record.unit === 'mmol' ? 'ммоль/л' : 'мг/дл'}</td>
+                  <td>${record.type === 'fasting' ? 'Натощак' : 
+                       record.type === 'after-meal' ? 'После еды' : 'Перед едой'}</td>
+                  <td>${record.notes || ''}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </body>
+      </html>
+    `);
+    
+    printWindow.document.close();
+    setTimeout(() => {
+      printWindow.print();
+      printWindow.close();
+    }, 250);
+  };
+
+  const printWeightTable = () => {
+    const printWindow = window.open('', '_blank');
+    const weightData = weightRecords.slice(-14).reverse();
+    
+    const calculateWeightDifferences = (records) => {
+      return records.map((record, index) => {
+        const prevRecord = records[index - 1];
+        const dailyDiff = prevRecord && record.morning && prevRecord.morning 
+          ? (record.morning - prevRecord.morning).toFixed(1) : null;
+        const dayDiff = record.morning && record.evening 
+          ? (record.evening - record.morning).toFixed(1) : null;
+        const nightDiff = prevRecord && record.morning && prevRecord.evening 
+          ? (record.morning - prevRecord.evening).toFixed(1) : null;
+        
+        return { ...record, dailyDiff, dayDiff, nightDiff };
+      });
+    };
+
+    const weightWithDiffs = calculateWeightDifferences(weightData);
+    
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Контроль веса</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+            th { background-color: #f2f2f2; }
+            h1 { color: #333; }
+            .print-date { color: #666; font-size: 14px; }
+            .positive { color: red; }
+            .negative { color: green; }
+          </style>
+        </head>
+        <body>
+          <h1>Контроль веса</h1>
+          <p class="print-date">Дата печати: ${new Date().toLocaleDateString('ru-RU')}</p>
+          <table>
+            <thead>
+              <tr>
+                <th>Дата</th>
+                <th>Утром (кг)</th>
+                <th>Вечером (кг)</th>
+                <th>За сутки</th>
+                <th>За день</th>
+                <th>За ночь</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${weightWithDiffs.map(record => `
+                <tr>
+                  <td>${record.date}</td>
+                  <td>${record.morning || '—'}</td>
+                  <td>${record.evening || '—'}</td>
+                  <td class="${record.dailyDiff > 0 ? 'positive' : record.dailyDiff < 0 ? 'negative' : ''}">
+                    ${record.dailyDiff ? (record.dailyDiff > 0 ? '+' : '') + record.dailyDiff : '—'} кг
+                  </td>
+                  <td class="${record.dayDiff > 0 ? 'positive' : record.dayDiff < 0 ? 'negative' : ''}">
+                    ${record.dayDiff ? (record.dayDiff > 0 ? '+' : '') + record.dayDiff : '—'} кг
+                  </td>
+                  <td class="${record.nightDiff > 0 ? 'positive' : record.nightDiff < 0 ? 'negative' : ''}">
+                    ${record.nightDiff ? (record.nightDiff > 0 ? '+' : '') + record.nightDiff : '—'} кг
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </body>
+      </html>
+    `);
+    
+    printWindow.document.close();
+    setTimeout(() => {
+      printWindow.print();
+      printWindow.close();
+    }, 250);
+  };
+
   const editGlucoseRecord = (record) => {
     setEditingGlucose(record);
     setGlucoseForm({
@@ -133,11 +267,13 @@ const DiabetesApp = () => {
                 Рост (см)
               </label>
               <input
-                type="tel"
+                type="number"
+                pattern="[0-9]*"
                 value={setup.height}
                 onChange={(e) => setSetup({...setup, height: e.target.value})}
+                onInput={(e) => setSetup({...setup, height: e.target.value})}
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Например: 170"
+                placeholder="170"
                 required
               />
             </div>
@@ -147,11 +283,14 @@ const DiabetesApp = () => {
                 Текущий вес (кг)
               </label>
               <input
-                type="tel"
+                type="number"
+                step="0.1"
+                pattern="[0-9]*[.,]?[0-9]*"
                 value={setup.weight}
                 onChange={(e) => setSetup({...setup, weight: e.target.value})}
+                onInput={(e) => setSetup({...setup, weight: e.target.value})}
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Например: 75.5"
+                placeholder="75.5"
                 required
               />
             </div>
@@ -386,9 +525,12 @@ const DiabetesApp = () => {
                 Значение ({userProfile.glucoseUnit === 'mmol' ? 'ммоль/л' : 'мг/дл'})
               </label>
               <input
-                type="tel"
+                type="number"
+                step="0.1"
+                pattern="[0-9]*[.,]?[0-9]*"
                 value={glucoseForm.value}
                 onChange={(e) => setGlucoseForm({...glucoseForm, value: e.target.value})}
+                onInput={(e) => setGlucoseForm({...glucoseForm, value: e.target.value})}
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 placeholder={userProfile.glucoseUnit === 'mmol' ? "5.5" : "100"}
                 required
@@ -543,9 +685,12 @@ const DiabetesApp = () => {
                 Утренний вес (кг)
               </label>
               <input
-                type="tel"
+                type="number"
+                step="0.1"
+                pattern="[0-9]*[.,]?[0-9]*"
                 value={weightForm.morning}
                 onChange={(e) => setWeightForm({...weightForm, morning: e.target.value})}
+                onInput={(e) => setWeightForm({...weightForm, morning: e.target.value})}
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 placeholder="75.5"
               />
@@ -556,9 +701,12 @@ const DiabetesApp = () => {
                 Вечерний вес (кг)
               </label>
               <input
-                type="tel"
+                type="number"
+                step="0.1"
+                pattern="[0-9]*[.,]?[0-9]*"
                 value={weightForm.evening}
                 onChange={(e) => setWeightForm({...weightForm, evening: e.target.value})}
+                onInput={(e) => setWeightForm({...weightForm, evening: e.target.value})}
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 placeholder="76.0"
               />
@@ -623,9 +771,17 @@ const DiabetesApp = () => {
           </div>
           
           <div className="mb-6">
-            <h3 className="text-lg font-semibold text-gray-700 mb-3">
-              Уровень сахара
-            </h3>
+            <div className="flex justify-between items-center mb-3">
+              <h3 className="text-lg font-semibold text-gray-700">
+                Уровень сахара
+              </h3>
+              <button
+                onClick={printGlucoseTable}
+                className="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-600"
+              >
+                🖨️ Печать
+              </button>
+            </div>
             <div className="space-y-2 max-h-40 overflow-y-auto">
               {glucoseRecords.slice(-10).reverse().map((record) => (
                 <div key={record.id} className="p-3 bg-gray-50 rounded-lg">
@@ -666,9 +822,17 @@ const DiabetesApp = () => {
           </div>
 
           <div>
-            <h3 className="text-lg font-semibold text-gray-700 mb-3">
-              Контроль веса
-            </h3>
+            <div className="flex justify-between items-center mb-3">
+              <h3 className="text-lg font-semibold text-gray-700">
+                Контроль веса
+              </h3>
+              <button
+                onClick={printWeightTable}
+                className="bg-green-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-600"
+              >
+                🖨️ Печать
+              </button>
+            </div>
             <div className="space-y-2 max-h-60 overflow-y-auto">
               {weightWithDiffs.slice(-7).reverse().map((record) => (
                 <div key={record.id || record.date} className="p-3 bg-gray-50 rounded-lg">
@@ -754,9 +918,11 @@ const DiabetesApp = () => {
                 Рост (см)
               </label>
               <input
-                type="tel"
+                type="number"
+                pattern="[0-9]*"
                 value={editProfile.height}
                 onChange={(e) => setEditProfile({...editProfile, height: e.target.value})}
+                onInput={(e) => setEditProfile({...editProfile, height: e.target.value})}
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -766,9 +932,12 @@ const DiabetesApp = () => {
                 Текущий вес (кг)
               </label>
               <input
-                type="tel"
+                type="number"
+                step="0.1"
+                pattern="[0-9]*[.,]?[0-9]*"
                 value={editProfile.weight}
                 onChange={(e) => setEditProfile({...editProfile, weight: e.target.value})}
+                onInput={(e) => setEditProfile({...editProfile, weight: e.target.value})}
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               />
             </div>
